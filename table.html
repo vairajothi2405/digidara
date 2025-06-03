@@ -1,0 +1,23 @@
+CREATE TABLE certificates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    certificate_link TEXT NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+);
+CREATE TABLE admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL  -- store hashed password ideally
+);
+-- Sample admin account (username: admin, password: password123)
+INSERT INTO admins (username, password) VALUES ('admin', 'password123');
+
+-- Sample student
+INSERT INTO students (name, regno, course, department, provider, email)
+VALUES ('Alice Smith', 'REG001', 'BSc Computer Science', 'CSE', 'Coursera', 'alice@example.com');
+
+-- Sample certificate links
+INSERT INTO certificates (student_id, certificate_link)
+VALUES 
+(1, 'https://certificate.example.com/alice1'),
+(1, 'https://certificate.example.com/alice2');

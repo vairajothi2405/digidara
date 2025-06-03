@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>View Your Certificates</title>
+  <style>
+    /* Body & Container */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 700px;
+  margin: 60px auto;
+  background: linear-gradient(135deg, #e0f7fa, #80deea);
+  padding: 25px 30px;
+  animation: backgroundShift 20s ease-in-out infinite alternate;
+  opacity: 0;
+  animation-fill-mode: forwards;
+  animation-name: fadeInBody;
+  animation-duration: 1.2s;
+  animation-timing-function: ease;
+}
+
+@keyframes backgroundShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+@keyframes fadeInBody {
+  to { opacity: 1; }
+}
+
+/* Form Styling */
+form {
+  background: #ffffffdd;
+  padding: 30px 35px;
+  border-radius: 14px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+  margin-bottom: 35px;
+  opacity: 0;
+  transform: translateY(40px);
+  animation: slideUpFadeIn 0.8s forwards;
+  animation-delay: 0.3s;
+}
+
+@keyframes slideUpFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+label {
+  display: block;
+  margin-top: 18px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #00796b;
+  letter-spacing: 0.03em;
+  transition: color 0.3s ease;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 14px 16px;
+  margin-top: 8px;
+  border: 2px solid #b2dfdb;
+  border-radius: 10px;
+  font-size: 1rem;
+  color: #004d40;
+  background-color: #e0f2f1;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, background-color 0.4s ease;
+  font-family: inherit;
+  resize: vertical;
+  box-shadow: inset 2px 2px 5px #a7c7c7;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #00796b;
+  background-color: #ffffff;
+  box-shadow: 0 0 12px #00796baa;
+  outline: none;
+}
+
+button {
+  margin-top: 28px;
+  padding: 14px;
+  width: 100%;
+  background: linear-gradient(45deg, #00796b, #004d40);
+  border: none;
+  color: white;
+  font-weight: 800;
+  font-size: 1.15rem;
+  cursor: pointer;
+  border-radius: 12px;
+  box-shadow: 0 8px 18px #004d40cc;
+  transition: background 0.4s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  letter-spacing: 0.05em;
+}
+
+button:hover {
+  background: linear-gradient(45deg, #004d40, #00796b);
+  transform: scale(1.07);
+  box-shadow: 0 12px 25px #004d40ee;
+}
+nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: center;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+  }
+
+  nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 12px 0;
+    display: flex;
+    gap: 35px;
+  }
+
+  nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  nav ul li a:hover,
+  nav ul li a.active {
+    background: #ff416c;
+    background: linear-gradient(45deg, #ff416c, #ff4b2b);
+    box-shadow: 0 6px 20px rgba(255, 75, 43, 0.7);
+    color: #fff;
+  }
+
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 15px;
+  background: transparent;
+  animation: fadeInTable 0.9s ease forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+@keyframes fadeInTable {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+th, td {
+  background: #004d40;
+  color: #e0f7f1;
+  padding: 16px 18px;
+  font-weight: 600;
+  border-radius: 12px;
+  text-align: left;
+  vertical-align: top;
+  user-select: none;
+  box-shadow: 0 2px 8px #004d40cc;
+  transition: background-color 0.3s ease;
+}
+
+td {
+  background: #e0f2f1;
+  color: #004d40;
+  font-weight: 500;
+  box-shadow: inset 1px 1px 6px #a7c7c7;
+  cursor: default;
+}
+
+tbody tr:hover td {
+  background-color: #b2dfdb;
+  color: #004d40;
+  box-shadow: inset 0 0 14px #00796baa;
+  transition: all 0.3s ease;
+}
+
+/* Lists inside table */
+ul {
+  padding-left: 20px;
+  margin: 0;
+  list-style-type: square;
+}
+
+ul li {
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #004d40;
+  transition: transform 0.25s ease, color 0.3s ease;
+}
+
+ul li:hover {
+  color: #00796b;
+  transform: scale(1.08);
+}
+
+/* Links */
+a {
+  color: #00796b;
+  text-decoration: none;
+  font-weight: 700;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  text-decoration: underline;
+  color: #004d40;
+}
+
+/* Table header specific */
+th:first-child {
+  border-radius: 14px 0 0 14px;
+}
+th:last-child {
+  border-radius: 0 14px 14px 0;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  body {
+    padding: 15px 20px;
+    margin: 30px auto;
+  }
+  form {
+    padding: 25px 20px;
+  }
+  th, td {
+    padding: 12px 10px;
+  }
+  button {
+    font-size: 1rem;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <h2>View Your Submitted Certificates</h2>
+  <nav>
+    <ul>
+      <li><a href="/home" >Home</a></li>
+      <li><a href="/student">Submit</a></li>
+      <li><a href="/admin_login">Admin</a></li>
+      <li><a href="/studentview" class="active">View</a></li>
+    </ul>
+  </nav>
+  <form method="GET" action="/view">
+    <label>Name</label>
+    <input type="text" name="name" value="{{request.args.get('name', '')}}" required />
+    
+    <label>Registration Number</label>
+    <input type="text" name="regno" value="{{request.args.get('regno', '')}}" required />
+    
+    <label>Email</label>
+    <input type="email" name="email" value="{{request.args.get('email', '')}}" required />
+    
+    <button type="submit">Search</button>
+  </form>
+
+  {% if student %}
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Registration No</th>
+        <th>Email</th>
+        <th>Course</th>
+        <th>Department</th>
+        <th>Provider</th>
+        <th>Certificate Links</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ student['name'] }}</td>
+        <td>{{ student['regno'] }}</td>
+        <td>{{ student['email'] }}</td>
+        <td>{{ student['course'] }}</td>
+        <td>{{ student['department'] }}</td>
+        <td>{{ student['provider'] }}</td>
+        <td>
+          <ul>
+          {% for link in student['cert_links'] %}
+            <li><a href="{{ link }}" target="_blank" rel="noopener noreferrer">Certificate {{ loop.index }}</a></li>
+          {% endfor %}
+          </ul>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  {% elif searched %}
+    <p class="message">No certificates found for the given details.</p>
+  {% endif %}
+</body>
+</html>
