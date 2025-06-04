@@ -1,0 +1,45 @@
+
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html>
+<head><title>Admin Dashboard</title>
+<link rel="stylesheet" href="/static/admin_certificate.css"></head>
+<body>
+<nav>
+  <a href="/vhome">Home</a>
+  <a href="/submit">Submit</a>
+  <a href="/my_certificate">view</a>
+  <a href="/admin">Admin</a>
+</nav>
+
+
+  <h2>All Certificates</h2>
+  <table border="1">
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Course</th>
+      <th>Department</th>
+      <th>Aadhar</th>
+      <th>Reg No</th>
+      <th>Link</th>
+      <th>Provider</th>
+      <th>Date</th>
+    </tr>
+    {% for student in students %}
+    <tr>
+      <td>{{ student[1] }}</td>
+      <td>{{ student[2] }}</td>
+      <td>{{ student[3] }}</td>
+      <td>{{ student[4] }}</td>
+      <td>{{ student[5] }}</td>
+      <td>{{ student[6] }}</td>
+      <td><a href="{{ student[8] }}" target="_blank">View</a></td>
+      <td>{{ student[7] }}</td>
+      <td>{{ student[9] }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <br>
+  <a href="/logout">Logout</a>
+</body>
+</html>
