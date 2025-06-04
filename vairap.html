@@ -1,0 +1,167 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/>from flask import Flask, render_template, request, redirect, url_for, session, flash
+import sqlite3
+
+app = Flask(__name__)
+app.secret_key = "your_secret_key_here"
+
+DB_NAME = 'submissions.db'
+
+# Admin credentials
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "123"
+
+# Initialize DB (no os used)
+def init_db():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS submissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            regno TEXT NOT NULL,
+            course TEXT NOT NULL,
+            department TEXT NOT NULL,
+            provider TEXT NOT NULL,
+            email TEXT NOT NULL,
+            certificate_links TEXT NOT NULL
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+@app.before_first_request
+def setup():
+    init_db()
+
+@app.route('/')
+def home():
+    return render_template("home.html")
+
+@app.route('/student_submission', methods=['GET', 'POST'])
+def student_submission():
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        regno = request.form.get('regno', '').strip()
+        course = request.form.get('course', '').strip()
+        department = request.form.get('department', '').strip()
+        provider = request.form.get('provider', '').strip()
+        email = request.form.get('email', '').strip()
+        certificate_links = request.form.getlist('certificate_links')
+        certificate_links = [link.strip() for link in certificate_links if link.strip()]
+        links_str = ",".join(certificate_links)
+
+        if not (name and regno and course and department and provider and email and certificate_links):
+            flash("Please fill all fields and provide at least one certificate link.", "error")
+            return redirect(url_for('student_submission'))
+
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            SELECT id, certificate_links FROM submissions
+            WHERE lower(regno) = ? AND lower(name) = ? AND lower(email) = ?
+        ''', (regno.lower(), name.lower(), email.lower()))
+        row = cursor.fetchone()
+
+        if row:
+            existing_links = row[1].split(',')
+            new_links = [link for link in certificate_links if link not in existing_links]
+            if new_links:
+                updated_links = existing_links + new_links
+                cursor.execute('''
+                    UPDATE submissions SET certificate_links = ?
+                    WHERE id = ?
+                ''', (",".join(updated_links), row[0]))
+        else:
+            cursor.execute('''
+                INSERT INTO submissions (name, regno, course, department, provider, email, certificate_links)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (name, regno, course, department, provider, email, links_str))
+
+        conn.commit()
+        conn.close()
+
+        flash("Your certificate submission was successful!", "success")
+        return redirect(url_for('student_submission'))
+
+    return render_template("student_submission.html")
+
+@app.route('/student_view', methods=['GET', 'POST'])
+def student_view():
+    student_data = None
+
+    if request.method == 'POST':
+        regno = request.form.get('regno', '').strip()
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT name, regno, certificate_links FROM submissions
+            WHERE lower(regno) = ? AND lower(name) = ? AND lower(email) = ?
+        ''', (regno.lower(), name.lower(), email.lower()))
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            student_data = {
+                'name': row[0],
+                'regno': row[1],
+                'certificate_links': row[2].split(',')
+            }
+        else:
+            flash("No submissions found for the given details.", "error")
+
+    return render_template("student_view.html", student=student_data)
+
+@app.route('/admin_login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session['admin_logged_in'] = True
+            return redirect(url_for('admin_view'))
+        else:
+            flash("Invalid username or password.", "error")
+            return redirect(url_for('admin_login'))
+
+    return render_template("admin_login.html")
+
+@app.route('/admin_view')
+def admin_view():
+    if not session.get('admin_logged_in'):
+        flash("Please log in as admin to access this page.", "error")
+        return redirect(url_for('admin_login'))
+
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('SELECT name, regno, course, department, provider, email, certificate_links FROM submissions')
+    rows = cursor.fetchall()
+    conn.close()
+
+    submissions = [
+        {
+            'name': row[0],
+            'regno': row[1],
+            'course': row[2],
+            'department': row[3],
+            'provider': row[4],
+            'email': row[5],
+            'certificate_links': row[6].split(',')
+        }
+        for row in rows
+    ]
+
+    return render_template("admin_view.html", submissions=submissions)
+
+@app.route('/logout')
+def logout():
+    session.pop('admin_logged_in', None)
+    flash("Logged out successfully.", "success")
+    return redirect(url_for('home'))
+
+if __name__ == '__main__':
+    app.run(debug=True)
