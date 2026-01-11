@@ -1,0 +1,85 @@
+/* Reset & basic font */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url("/static/images/welcomebg.jpg");
+    background-size: cover;
+    background-position: center;
+    animation: bgAnimation 15s infinite alternate;
+    color:black;
+    text-align: center;
+    flex-direction: column; /* Stack heading + buttons vertically */
+}
+
+/* Background gradient animation */
+@keyframes bgAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Heading */
+h1 {
+    font-size: 3rem;
+    margin-bottom: 50px;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    animation: fadeIn 2s ease forwards;
+}
+
+/* Buttons container */
+body > a {
+    display: inline-block;
+    margin: 15px;
+    padding: 20px 40px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-decoration: none;
+    color: #b7bcb7;
+    background: linear-gradient(135deg, #ff7e5f, #feb47b);
+    border-radius: 12px;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Button hover */
+body > a:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 12px 20px rgba(0,0,0,0.4);
+}
+
+/* Button shine effect */
+body > a::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255,255,255,0.2);
+    transform: rotate(45deg) translate(-100%, -100%);
+    transition: all 0.5s ease;
+}
+
+body > a:hover::before {
+    transform: rotate(45deg) translate(0, 0);
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

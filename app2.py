@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_socketio import SocketIO, emit
 import mysql.connector
-import random, string
+import random, string,threading
 
 app = Flask(__name__)
 app.secret_key = "secret123"
@@ -133,7 +133,7 @@ def send_next_question(student):
         "qno": cq_index + 1,
         "question": question["question_text"],
         "options": options,
-        "time": 10  # seconds per question
+        "time": 15  # seconds per question
     })
 
 
@@ -154,11 +154,60 @@ def submit_answer(data):
     score_increment = max(0, 10 - time_taken) if selected == correct else 0
     student["score"] += score_increment
 
-    emit("answer_result", {"correct": correct, "selected": selected, "score": student["score"]})
+    emit("answer_result", {"correct": correct, "selected": selected, "score": student["score"]},room=request.sid)
 
     # Move to next question
     student["current_question"] += 1
     send_next_question(student)
+
+@socketio.on("submit_answer")
+def handle_answer(data):
+    sid = request.sid  # unique socket for student
+    if sid not in students:
+        return
+    
+    student = students[sid]
+    q_index = student["current_question"]
+    
+    # Get current question
+    question = student["questions"][q_index]
+    
+    selected = data.get("answer")
+    correct = question["correct_option"]
+    time_taken = data.get("time_taken", 0)
+    
+    # Score calculation (speed-based)
+    if selected == correct:
+        student["score"] += max(0, 10 - time_taken)  # 10 marks max minus seconds taken
+    
+    # Emit result to that student ONLY
+    emit("answer_result", {
+        "selected": selected,
+        "correct": correct,
+        "score": student["score"]
+    }, room=sid)
+    
+    # Move to next question
+    student["current_question"] += 1
+    
+    if student["current_question"] < len(student["questions"]):
+        next_q = student["questions"][student["current_question"]]
+        emit("new_question", {
+            "qno": student["current_question"] + 1,
+            "question": next_q["question_text"],
+            "options": [
+                next_q["option1"], next_q["option2"],
+                next_q["option3"], next_q["option4"]
+            ],
+            "time": 15  # seconds
+        }, room=sid)
+    else:
+        # Quiz finished
+        emit("quiz_finished", {
+            "final_score": student["score"]
+        }, room=sid)   
+
+    
 
 
 if __name__ == "__main__":
