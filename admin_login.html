@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_login.css') }}">
+</head>
+<body>
+
+<div class="login-wrapper">
+
+    <h1>ADMIN LOGIN</h1>
+
+    <!-- Error message -->
+    {% if error %}
+        <p class="error" id="error-msg">{{ error }}</p>
+    {% endif %}
+
+    <!-- Login Form -->
+    <form method="POST" oninput="clearError()">
+        <!-- Username -->
+        <div class="input-group">
+            <input type="text" name="username" id="username" required>
+            <label for="username">USERNAME</label>
+        </div>
+
+        <!-- Password -->
+        <div class="input-group password-group">
+            <input type="password" name="password" id="password" required>
+            <label for="password">PASSWORD</label>
+            <span class="toggle" onclick="togglePassword()"></span>
+        </div>
+
+        <!-- Login Button -->
+        <button type="submit">LOGIN</button>
+    </form>
+
+</div>
+
+<!-- JS -->
+<script>
+    // Toggle password visibility
+    function togglePassword(){
+        const pass = document.getElementById("password");
+        pass.type = pass.type === "password" ? "text" : "password";
+    }
+
+    // Clear error message when user types
+    function clearError(){
+        const err = document.getElementById("error-msg");
+        if(err){
+            err.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>

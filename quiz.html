@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='quiz.css') }}">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+
+<div class="quiz-container">
+
+    <div class="top-bar">
+        <div id="qno">Question 1</div>
+        <div id="timer">10</div>
+        <div id="score">Score: 0</div>
+    </div>
+
+    <h2 id="question">Loading...</h2>
+
+    <div id="options" class="options"></div>
+
+    <button id="nextBtn" onclick="nextClick()">Next</button>
+
+</div>
+<script>
+const socket = io();
+
+let selectedAnswer = "";
+let timeLeft = 0;
+let timerInterval = null;
+let answered = false;
+let allowSelect = true;
+
+// JOIN QUIZ
+socket.emit("join_quiz");
+
+// NEW QUESTION
+socket.on("new_question", data => {
+    clearInterval(timerInterval);
+
+    document.getElementById("qno").innerText = "Question " + data.qno;
+    document.getElementById("question").innerText = data.question;
+    document.getElementById("score").innerText = "Score: " + data.score;
+
+    const optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = "";
+
+    selectedAnswer = "";
+    answered = false;
+    allowSelect = true;
+
+    data.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.innerText = opt;
+
+        btn.onclick = () => {
+            if (!allowSelect || answered) return;
+
+            selectedAnswer = opt;
+            document.querySelectorAll("#options button")
+                .forEach(b => b.classList.remove("selected"));
+            btn.classList.add("selected");
+        };
+
+        optionsDiv.appendChild(btn);
+    });
+
+    document.getElementById("nextBtn").disabled = false;
+
+    timeLeft = data.time;
+    document.getElementById("timer").innerText = "Time: " + timeLeft;
+
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").innerText = "Time: " + timeLeft;
+
+        // ⏰ TIMER FINISH
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+
+            answered = true;
+            allowSelect = false;
+
+            socket.emit("submit_answer", {
+                answer: selectedAnswer || "",
+                time_left: 0
+            });
+
+            // AUTO NEXT QUESTION after 2 sec
+            setTimeout(() => {
+                socket.emit("next_question");
+            }, 2000);
+        }
+    }, 1000);
+});
+
+// NEXT BUTTON CLICK (manual)
+function nextClick() {
+    if (answered) return;
+
+    answered = true;
+    allowSelect = false;
+    clearInterval(timerInterval);
+
+    socket.emit("submit_answer", {
+        answer: selectedAnswer,
+        time_left: timeLeft
+    });
+
+    setTimeout(() => {
+        socket.emit("next_question");
+    }, 500);
+}
+
+// ANSWER RESULT
+socket.on("answer_result", data => {
+    const buttons = document.querySelectorAll("#options button");
+
+    buttons.forEach(btn => {
+        btn.disabled = true;
+
+        if (btn.innerText === data.correct)
+            btn.classList.add("correct");
+
+        if (
+            btn.innerText === data.selected &&
+            data.selected !== data.correct
+        )
+            btn.classList.add("wrong");
+    });
+
+    document.getElementById("score").innerText =
+        "Score: " + data.score;
+});
+
+// QUIZ FINISHED
+socket.on("quiz_finished", data => {
+    document.body.innerHTML = `
+        <div class="quiz-finished">
+            <h1>🎉 Quiz Finished 🎉</h1>
+            <h2>Your Score: ${data.final_score}</h2>
+        </div>
+    `;
+});
+</script>
+
+</body>
+</html>
